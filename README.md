@@ -1,10 +1,14 @@
-Clojure library for Compressing & Decompressing JAR files
+[![Clojars Project](https://img.shields.io/clojars/v/metabase/jar-compression.svg)](https://clojars.org/metabase/jar-compression)
+
+Clojure library for programatically Compressing & Decompressing JAR files
 
 ```clj
 (compress! source-jar & {:as options})
 
 (decompress! source-jar & {:as options})
 ```
+
+Why would you want to do this? Maybe you're bundling a bunch of JARs inside your uberjar and then extracting them and adding them to the classpath at runtime. Might as well shrink those JARs as small as we can
 
 ### Compressing JAR Files
 
