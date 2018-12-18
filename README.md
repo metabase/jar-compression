@@ -133,3 +133,10 @@ You can add support for more input and output types besides `String`
 and `Path` filenames and `InputStream`/`OutputStream` by adding
 implementations for `metabase.jar-compression.common` methods
 `->input-stream` and `->output-stream`.
+
+
+### License
+
+Copyright © 2018 Metabase, Inc.
+
+Distributed under the Eclipse Public License, same as Clojure.
