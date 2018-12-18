@@ -8,6 +8,8 @@ Clojure library for programatically Compressing & Decompressing JAR files
 (decompress! source-jar & {:as options})
 ```
 
+You can also use this as a Leiningen plugin! See https://github.com/metabase/lein-compress-jar
+
 Why would you want to do this? Maybe you're bundling a bunch of JARs inside your uberjar and then extracting them and adding them to the classpath at runtime. Might as well shrink those JARs as small as we can
 
 ### Compressing JAR Files
