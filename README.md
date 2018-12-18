@@ -67,6 +67,10 @@ In contrast, note that the Metabase uberjar itself needs to keep
 directory entries because we iterate over entries under the `modules`
 directory (via `io/resource`).
 
+###### :strip-source
+
+Whether to strip Clojure and Java source files from the compressed JAR. Default: `true`
+
 ###### :compression
 
 Compression method to use. Defaults to `:xz`. Allowed options are

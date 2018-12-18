@@ -33,23 +33,34 @@
 (defn make-blacklist-fn
   "Make a function that can be used to filter out ZipEntries from the source JAR. `blacklist` is an optional list of
   classnames to exclude, or the name of a file containing classnames separated by newlines."
-  [blacklist strip-directories?]
+  [blacklist strip-directories? strip-source?]
   (let [filter-blacklist
         (when blacklist
           (let [blacklist (maybe-slurp blacklist)]
             (fn [^ZipEntry entry]
-              (when (contains? blacklist (str entry))
-                (println "Skipping file in blacklist:" (str entry))
-                true))))
+              (when entry
+                (when (contains? blacklist (str entry))
+                  (println "Skipping file in blacklist:" (str entry))
+                  true)))))
 
         filter-directories
         (when strip-directories?
           (fn [^ZipEntry entry]
-            (when (.isDirectory entry)
-              (println "Skipping directory:" (str entry))
-              true)))
+            (when entry
+              (when (.isDirectory entry)
+                (println "Skipping directory:" (str entry))
+                true))))
 
-        blacklist-fns (filter some? [filter-blacklist filter-directories])]
+        filter-source
+        (when strip-source?
+          (fn [^ZipEntry entry]
+            (when entry
+              (when (or (str/ends-with? (str entry) ".clj")
+                        (str/ends-with? (str entry) ".java"))
+                (println "Skipping source:" (str entry))
+                true))))
+
+        blacklist-fns (filter some? [filter-blacklist filter-directories filter-source])]
     (if (seq blacklist-fns)
       (apply some-fn blacklist-fns)
       (constantly false))))
@@ -72,7 +83,7 @@
         properties (.properties packer)]
     (.put properties Pack200$Packer/EFFORT "9")
     (.put properties Pack200$Packer/UNKNOWN_ATTRIBUTE Pack200$Packer/PASS)
-    (loop [i 0, [^String class-to-skip & more] (maybe-slurp classes-to-skip)]
+    (loop [i 0, [^String class-to-skip & more] (seq (maybe-slurp classes-to-skip))]
       (when class-to-skip
         (.put properties (str Pack200$Packer/PASS_FILE_PFX i) class-to-skip)
         (recur (inc i) more)))
@@ -83,9 +94,10 @@
   (let [packer (pack200-packer-with-options opts)
         pack!  (future (.pack packer is os))]
     (while (not (realized? pack!))
-        (println (format "Packing: progress %s %%" (.get (.properties packer) Pack200$Packer/PROGRESS)))
-        (Thread/sleep 2000))
-      (println "Packing: finished.")))
+      (println (format "Packing: progress %s %%" (or (.get (.properties packer) Pack200$Packer/PROGRESS)
+                                                     "0")))
+      (Thread/sleep 2000))
+    (println "Packing: finished.")))
 
 
 ;;; ----------------------------------------------- write! -- default ------------------------------------------------

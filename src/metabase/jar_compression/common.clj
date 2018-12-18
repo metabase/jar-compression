@@ -6,12 +6,15 @@
 
 (defmacro ^:private varargs
   "Make a properly-tagged Java interop varargs argument."
-  [klass & [objects]]
-  (vary-meta `(into-array ~klass ~objects)
+  [klass & objects]
+  (vary-meta `(into-array ~klass [~@objects])
              assoc :tag (format "[L%s;" (.getCanonicalName ^Class (ns-resolve *ns* klass)))))
 
 (defn- get-path ^Path [^String path-component]
-  (.getPath (FileSystems/getDefault) path-component (varargs String)))
+  (let [path (.getPath (FileSystems/getDefault) path-component (varargs String))]
+    (if (.isAbsolute path)
+      path
+      (.getPath (FileSystems/getDefault) (System/getProperty "user.dir") (varargs String path-component)))))
 
 
 ;;; ---------------------------------------- ->input-stream & ->output-stream ----------------------------------------
